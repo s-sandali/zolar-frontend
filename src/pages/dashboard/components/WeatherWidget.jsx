@@ -245,4 +245,3 @@ export function WeatherWidget({ solarUnitId }) {
     </Card>
   );
 }
-s

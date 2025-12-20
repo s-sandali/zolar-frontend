@@ -18,12 +18,12 @@ const items = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: <LayoutDashboard className="w-8 h-8" size={32} />,
+    icon: <LayoutDashboard className="w-10 h-10" size={32} />,
   },
   {
     title: "Anomalies",
     url: "/dashboard/anomalies",
-    icon: <TriangleAlert className="w-8 h-8" size={32} />,
+    icon: <TriangleAlert className="w-10 h-8" size={32} />,
   },
   {
     title: "Analytics",
@@ -52,14 +52,24 @@ const SideBarTab = ({ item }) => {
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar className="pt-6">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-3xl font-bold text-foreground">
-            <Link to="/">Aelora</Link>
+          <SidebarGroupLabel className="mb-6 mt-2 flex items-center justify-center">
+            <Link
+              to="/"
+              className="inline-flex items-center rounded-md px-2 py-1"
+              aria-label="Go to Zolar home"
+            >
+              <img
+                src="/assets/images/zolar-logo.png"
+                alt="Zolar Logo"
+                className="h-24 w-auto max-w-[150px] object-contain drop-shadow-md"
+              />
+            </Link>
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="mt-4 text">
+            <SidebarMenu className="mt-6 text">
               {items.map((item) => (
                 <SideBarTab key={item.url} item={item} />
               ))}
