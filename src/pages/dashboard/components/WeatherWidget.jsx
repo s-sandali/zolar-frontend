@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Cloud, CloudRain, Sun, Wind, Thermometer, Gauge, AlertCircle, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+const WEATHER_IMAGES = {
+  sunny: "/assets/images/sunny.jpg",
+  rainy: "/assets/images/rainy.jpg",
+  cloudy: "/assets/images/cloudy.jpg",
+};
+
 const getWeatherGradient = (condition, score) => {
   // Return gradient based on weather condition and score
   if (score >= 80) {
@@ -34,6 +40,24 @@ const getWeatherIcon = (condition, score) => {
   } else {
     return <Cloud className={`${iconClass} text-gray-400 top-4 right-4`} />;
   }
+};
+
+const getWeatherBackground = (condition, score) => {
+  const normalizedCondition = condition?.toLowerCase() || "";
+
+  if (score >= 80 || normalizedCondition.includes("sun") || normalizedCondition.includes("clear")) {
+    return WEATHER_IMAGES.sunny;
+  }
+
+  if (
+    normalizedCondition.includes("rain") ||
+    normalizedCondition.includes("storm") ||
+    normalizedCondition.includes("drizzle")
+  ) {
+    return WEATHER_IMAGES.rainy;
+  }
+
+  return WEATHER_IMAGES.cloudy;
 };
 
 const getRatingColor = (rating) => {
@@ -110,13 +134,22 @@ export function WeatherWidget({ solarUnitId }) {
   const { current, solarImpact, location } = weather;
   const gradientClass = getWeatherGradient(current.condition, solarImpact.score);
   const weatherIcon = getWeatherIcon(current.condition, solarImpact.score);
+  const weatherBackground = getWeatherBackground(current.condition, solarImpact.score);
   const ratingColorClass = getRatingColor(solarImpact.rating);
   const scoreColorClass = getScoreColor(solarImpact.score);
 
   return (
     <Card className={`h-full relative overflow-hidden ${gradientClass}`}>
-      {/* Animated Weather Icon Background */}
+      {/* Weather Background */}
       <div className="absolute inset-0 pointer-events-none">
+        {weatherBackground && (
+          <div
+            className="absolute inset-0 bg-cover bg-center scale-110"
+            style={{ backgroundImage: `url(${weatherBackground})` }}
+            aria-hidden="true"
+          />
+        )}
+        <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
         {weatherIcon}
       </div>
 
@@ -207,57 +240,9 @@ export function WeatherWidget({ solarUnitId }) {
               </div>
             </div>
           </div>
-
-          {/* Impact Breakdown */}
-          {solarImpact.breakdown && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-muted-foreground">Impact Breakdown</h4>
-              <div className="space-y-1 text-xs">
-                {solarImpact.breakdown.cloudImpact !== 0 && (
-                  <div className="flex justify-between">
-                    <span>Cloud Impact:</span>
-                    <span className={solarImpact.breakdown.cloudImpact < 0 ? "text-red-600" : "text-green-600"}>
-                      {solarImpact.breakdown.cloudImpact > 0 ? "+" : ""}{solarImpact.breakdown.cloudImpact}
-                    </span>
-                  </div>
-                )}
-                {solarImpact.breakdown.rainImpact !== 0 && (
-                  <div className="flex justify-between">
-                    <span>Rain Impact:</span>
-                    <span className={solarImpact.breakdown.rainImpact < 0 ? "text-red-600" : "text-green-600"}>
-                      {solarImpact.breakdown.rainImpact > 0 ? "+" : ""}{solarImpact.breakdown.rainImpact}
-                    </span>
-                  </div>
-                )}
-                {solarImpact.breakdown.irradianceBoost !== 0 && (
-                  <div className="flex justify-between">
-                    <span>Irradiance Boost:</span>
-                    <span className={solarImpact.breakdown.irradianceBoost < 0 ? "text-red-600" : "text-green-600"}>
-                      {solarImpact.breakdown.irradianceBoost > 0 ? "+" : ""}{solarImpact.breakdown.irradianceBoost}
-                    </span>
-                  </div>
-                )}
-                {solarImpact.breakdown.tempImpact !== 0 && (
-                  <div className="flex justify-between">
-                    <span>Temperature Impact:</span>
-                    <span className={solarImpact.breakdown.tempImpact < 0 ? "text-red-600" : "text-green-600"}>
-                      {solarImpact.breakdown.tempImpact > 0 ? "+" : ""}{solarImpact.breakdown.tempImpact}
-                    </span>
-                  </div>
-                )}
-                {solarImpact.breakdown.windBoost !== 0 && (
-                  <div className="flex justify-between">
-                    <span>Wind Cooling Boost:</span>
-                    <span className={solarImpact.breakdown.windBoost < 0 ? "text-red-600" : "text-green-600"}>
-                      {solarImpact.breakdown.windBoost > 0 ? "+" : ""}{solarImpact.breakdown.windBoost}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </CardContent>
       </div>
     </Card>
   );
 }
+s
