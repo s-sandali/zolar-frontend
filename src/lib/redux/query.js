@@ -15,18 +15,22 @@ export const api = createApi({
     }
     return headers;
   } }),
+  tagTypes: ["SolarUnit", "Weather"],
   endpoints: (build) => ({
     getEnergyGenerationRecordsBySolarUnit: build.query({
       query: ({id, groupBy, limit}) => `/energy-generation-records/solar-unit/${id}?groupBy=${groupBy}&limit=${limit}`,
     }),
     getSolarUnitForUser: build.query({
       query: () => `/solar-units/me`,
+      providesTags: ["SolarUnit"],
     }),
     getSolarUnits: build.query({
       query: () => `/solar-units`,
+      providesTags: ["SolarUnit"],
     }),
     getSolarUnitById: build.query({
       query: (id) => `/solar-units/${id}`,
+      providesTags: ["SolarUnit"],
     }),
     createSolarUnit: build.mutation({
       query: (data) => ({
@@ -34,6 +38,7 @@ export const api = createApi({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["SolarUnit"],
     }),
     editSolarUnit: build.mutation({
       query: ({id, data}) => ({
@@ -41,12 +46,14 @@ export const api = createApi({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["SolarUnit", "Weather"],
     }),
     getAllUsers: build.query({
       query: () => `/users`,
     }),
     getWeatherBySolarUnit: build.query({
       query: (solarUnitId) => `/weather/current/${solarUnitId}`,
+      providesTags: ["Weather"],
     }),
   }),
 });

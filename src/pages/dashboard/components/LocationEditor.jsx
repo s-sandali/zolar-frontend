@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,14 +32,28 @@ export function LocationEditor({ solarUnit }) {
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            location: solarUnit.location || {
-                latitude: null,
-                longitude: null,
-                city: "",
-                country: "",
+            location: {
+                latitude: solarUnit.location?.latitude || 0,
+                longitude: solarUnit.location?.longitude || 0,
+                city: solarUnit.location?.city || "",
+                country: solarUnit.location?.country || "",
             },
         },
     });
+
+    // Update form when solarUnit changes
+    useEffect(() => {
+        if (solarUnit.location?.latitude && solarUnit.location?.longitude) {
+            form.reset({
+                location: {
+                    latitude: solarUnit.location.latitude,
+                    longitude: solarUnit.location.longitude,
+                    city: solarUnit.location.city || "",
+                    country: solarUnit.location.country || "",
+                },
+            });
+        }
+    }, [solarUnit, form]);
 
     const [editSolarUnit, { isLoading: isEditingSolarUnit }] = useEditSolarUnitMutation();
 
@@ -110,46 +124,41 @@ export function LocationEditor({ solarUnit }) {
     const hasLocation = solarUnit.location?.latitude && solarUnit.location?.longitude;
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Solar Panel Location</CardTitle>
-                <CardDescription>
-                    {hasLocation
-                        ? "Update your solar panel's location for accurate weather data"
-                        : "Set your solar panel's location to enable weather insights"}
+        <Card className="h-full">
+            <CardHeader className="pb-3">
+                <CardTitle className="text-base">Panel Location</CardTitle>
+                <CardDescription className="text-xs">
+                    {hasLocation ? "Update location" : "Set location for weather"}
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                                Use auto-detect or enter coordinates manually
-                            </p>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={handleDetectLocation}
-                                disabled={isDetectingLocation}
-                            >
-                                <MapPin className="w-4 h-4 mr-2" />
-                                {isDetectingLocation ? "Detecting..." : "Auto-detect"}
-                            </Button>
-                        </div>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={handleDetectLocation}
+                            disabled={isDetectingLocation}
+                        >
+                            <MapPin className="w-4 h-4 mr-2" />
+                            {isDetectingLocation ? "Detecting..." : "Auto-detect Location"}
+                        </Button>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-2">
                             <FormField
                                 control={form.control}
                                 name="location.latitude"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Latitude</FormLabel>
+                                        <FormLabel className="text-xs">Latitude</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 step="any"
                                                 placeholder="37.7749"
+                                                className="h-8 text-sm"
                                                 {...field}
                                                 onChange={(e) => {
                                                     field.onChange(Number.parseFloat(e.target.value));
@@ -157,7 +166,7 @@ export function LocationEditor({ solarUnit }) {
                                                 }}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage className="text-xs" />
                                     </FormItem>
                                 )}
                             />
@@ -167,12 +176,13 @@ export function LocationEditor({ solarUnit }) {
                                 name="location.longitude"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Longitude</FormLabel>
+                                        <FormLabel className="text-xs">Longitude</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 step="any"
                                                 placeholder="-122.4194"
+                                                className="h-8 text-sm"
                                                 {...field}
                                                 onChange={(e) => {
                                                     field.onChange(Number.parseFloat(e.target.value));
@@ -180,22 +190,23 @@ export function LocationEditor({ solarUnit }) {
                                                 }}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage className="text-xs" />
                                     </FormItem>
                                 )}
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-2">
                             <FormField
                                 control={form.control}
                                 name="location.city"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>City (Optional)</FormLabel>
+                                        <FormLabel className="text-xs">City</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="San Francisco"
+                                                className="h-8 text-sm"
                                                 {...field}
                                                 onChange={(e) => {
                                                     field.onChange(e);
@@ -203,7 +214,7 @@ export function LocationEditor({ solarUnit }) {
                                                 }}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage className="text-xs" />
                                     </FormItem>
                                 )}
                             />
@@ -213,10 +224,11 @@ export function LocationEditor({ solarUnit }) {
                                 name="location.country"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Country (Optional)</FormLabel>
+                                        <FormLabel className="text-xs">Country</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="United States"
+                                                className="h-8 text-sm"
                                                 {...field}
                                                 onChange={(e) => {
                                                     field.onChange(e);
@@ -224,28 +236,28 @@ export function LocationEditor({ solarUnit }) {
                                                 }}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage className="text-xs" />
                                     </FormItem>
                                 )}
                             />
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <Button type="submit" disabled={isEditingSolarUnit}>
-                                {isEditingSolarUnit ? "Saving..." : "Save Location"}
+                            <Button type="submit" size="sm" disabled={isEditingSolarUnit} className="flex-1">
+                                {isEditingSolarUnit ? "Saving..." : "Save"}
                             </Button>
                             {isSaved && (
-                                <span className="flex items-center text-sm text-green-600">
-                                    <Check className="w-4 h-4 mr-1" />
-                                    Location saved!
+                                <span className="flex items-center text-xs text-green-600">
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Saved!
                                 </span>
                             )}
                         </div>
 
                         {!hasLocation && (
-                            <div className="flex items-start gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3">
-                                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                <span>Weather widget will be available once you set your location.</span>
+                            <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-2">
+                                <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                <span>Set location to enable weather widget</span>
                             </div>
                         )}
                     </form>

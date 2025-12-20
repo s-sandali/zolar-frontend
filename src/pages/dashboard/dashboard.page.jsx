@@ -1,6 +1,7 @@
 import { useGetSolarUnitForUserQuery } from "@/lib/redux/query";
 import DataChart from "./components/DataChart";
 import { LocationEditor } from "./components/LocationEditor";
+import { WeatherWidget } from "./components/WeatherWidget";
 import { useUser } from "@clerk/clerk-react";
 import { MapPin } from "lucide-react";
 
@@ -17,9 +18,12 @@ const DashboardPage = () => {
     return <div>Error: {errorSolarUnit.message}</div>;
   }
 
-  console.log(solarUnit);
+  console.log("Solar Unit Data:", solarUnit);
+  console.log("Location:", solarUnit?.location);
 
   const hasLocation = solarUnit?.location?.latitude && solarUnit?.location?.longitude;
+
+  console.log("Has Location:", hasLocation);
 
   return (
     <main className="mt-4">
@@ -45,19 +49,17 @@ const DashboardPage = () => {
           </div>
         )}
 
-        {/* Main dashboard content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column - Chart (takes 2/3 width on large screens) */}
-          <div className="lg:col-span-2">
-            <DataChart solarUnitId={solarUnit._id} />
+        {/* Weather and Location widgets side by side (only when location is set) */}
+        {hasLocation && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <WeatherWidget solarUnitId={solarUnit._id} />
+            <LocationEditor solarUnit={solarUnit} />
           </div>
+        )}
 
-          {/* Right column - Location editor (takes 1/3 width on large screens) */}
-          {hasLocation && (
-            <div className="lg:col-span-1">
-              <LocationEditor solarUnit={solarUnit} />
-            </div>
-          )}
+        {/* Main dashboard chart */}
+        <div>
+          <DataChart solarUnitId={solarUnit._id} />
         </div>
       </div>
     </main>
