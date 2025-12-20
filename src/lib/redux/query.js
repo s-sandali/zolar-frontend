@@ -15,7 +15,7 @@ export const api = createApi({
     }
     return headers;
   } }),
-  tagTypes: ["SolarUnit", "Weather"],
+  tagTypes: ["SolarUnit", "Weather", "Anomalies"],
   endpoints: (build) => ({
     getEnergyGenerationRecordsBySolarUnit: build.query({
       query: ({id, groupBy, limit}) => `/energy-generation-records/solar-unit/${id}?groupBy=${groupBy}&limit=${limit}`,
@@ -55,6 +55,38 @@ export const api = createApi({
       query: (solarUnitId) => `/weather/current/${solarUnitId}`,
       providesTags: ["Weather"],
     }),
+    // Anomaly endpoints
+    getUserAnomalies: build.query({
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.type) queryParams.append('type', params.type);
+        if (params.severity) queryParams.append('severity', params.severity);
+        if (params.status) queryParams.append('status', params.status);
+        if (params.limit) queryParams.append('limit', params.limit);
+        if (params.offset) queryParams.append('offset', params.offset);
+        return `/anomalies/me${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      providesTags: ["Anomalies"],
+    }),
+    getAnomalyStats: build.query({
+      query: () => `/anomalies/stats`,
+      providesTags: ["Anomalies"],
+    }),
+    acknowledgeAnomaly: build.mutation({
+      query: (id) => ({
+        url: `/anomalies/${id}/acknowledge`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Anomalies"],
+    }),
+    resolveAnomaly: build.mutation({
+      query: ({ id, resolutionNotes }) => ({
+        url: `/anomalies/${id}/resolve`,
+        method: "PATCH",
+        body: { resolutionNotes },
+      }),
+      invalidatesTags: ["Anomalies"],
+    }),
   }),
 });
 
@@ -68,5 +100,9 @@ export const {
   useGetSolarUnitByIdQuery,
   useCreateSolarUnitMutation,
   useEditSolarUnitMutation,
-  useGetWeatherBySolarUnitQuery
+  useGetWeatherBySolarUnitQuery,
+  useGetUserAnomaliesQuery,
+  useGetAnomalyStatsQuery,
+  useAcknowledgeAnomalyMutation,
+  useResolveAnomalyMutation,
 } = api;
