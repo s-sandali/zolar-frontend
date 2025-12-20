@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useEditSolarUnitMutation } from "@/lib/redux/query"
 import { useParams } from "react-router"
 import { useGetAllUsersQuery } from "@/lib/redux/query"
+import { useState } from "react"
+import { MapPin, AlertTriangle } from "lucide-react"
 
 const formSchema = z.object({
     serialNumber: z.string().min(1, { message: "Serial number is required" }),
@@ -23,9 +25,17 @@ const formSchema = z.object({
     capacity: z.number().positive({ message: "Capacity must be a positive number" }),
     status: z.enum(["ACTIVE", "INACTIVE", "MAINTENANCE"], { message: "Please select a valid status" }),
     userId: z.string().min(1, { message: "User ID is required" }),
+    location: z.object({
+        latitude: z.number().min(-90).max(90),
+        longitude: z.number().min(-180).max(180),
+        city: z.string().optional(),
+        country: z.string().optional(),
+    }).optional(),
 });
 
 export function EditSolarUnitForm({ solarUnit }) {
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -34,8 +44,51 @@ export function EditSolarUnitForm({ solarUnit }) {
             capacity: solarUnit.capacity,
             status: solarUnit.status,
             userId: solarUnit.userId,
+            location: solarUnit.location || {},
         },
     })
+
+    // Auto-detect location using browser geolocation API
+    const handleDetectLocation = () => {
+        setIsDetectingLocation(true);
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            setIsDetectingLocation(false);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                form.setValue("location.latitude", latitude);
+                form.setValue("location.longitude", longitude);
+
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+                    );
+                    const data = await response.json();
+
+                    const city = data.address?.city || data.address?.town || data.address?.village || "";
+                    const country = data.address?.country || "";
+
+                    form.setValue("location.city", city);
+                    form.setValue("location.country", country);
+                } catch (error) {
+                    console.error("Error fetching city name:", error);
+                }
+
+                setIsDetectingLocation(false);
+            },
+            (error) => {
+                console.error("Error detecting location:", error);
+                alert("Unable to detect location. Please enter manually.");
+                setIsDetectingLocation(false);
+            }
+        );
+    };
 
     const { id } = useParams();
 
@@ -140,6 +193,100 @@ export function EditSolarUnitForm({ solarUnit }) {
                         </FormItem>
                     )}
                 />
+
+                {/* Location Section */}
+                <div className="space-y-4 border-t pt-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">Location (for weather data)</h3>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleDetectLocation}
+                            disabled={isDetectingLocation}
+                        >
+                            <MapPin className="w-4 h-4 mr-2" />
+                            {isDetectingLocation ? "Detecting..." : "Auto-detect"}
+                        </Button>
+                    </div>
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground bg-amber-50 border border-amber-200 rounded-md p-3">
+                        <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-600" />
+                        <span>Note: Auto-detect uses your location, not the user's. Users can set their own location from their dashboard for accurate weather data.</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="location.latitude"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Latitude</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="any"
+                                            placeholder="37.7749"
+                                            {...field}
+                                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="location.longitude"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Longitude</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="any"
+                                            placeholder="-122.4194"
+                                            {...field}
+                                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="location.city"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>City (Optional)</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="San Francisco" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="location.country"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Country (Optional)</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="United States" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
                 <Button type="submit" disabled={isEditingSolarUnit}>{isEditingSolarUnit ? "Editing..." : "Edit"}</Button>
             </form>
         </Form>
