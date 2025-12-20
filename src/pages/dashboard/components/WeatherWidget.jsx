@@ -8,9 +8,15 @@ const WEATHER_IMAGES = {
   sunny: "/assets/images/sunny.jpg",
   rainy: "/assets/images/rainy.jpg",
   cloudy: "/assets/images/cloudy.jpg",
+  night: "/assets/images/night.jpg",
 };
 
-const getWeatherGradient = (condition, score) => {
+const getWeatherGradient = (condition, score, isDay) => {
+  // Nighttime - use dark gradient
+  if (!isDay) {
+    return "bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900";
+  }
+
   // Return gradient based on weather condition and score
   if (score >= 80) {
     // Excellent - Sunny yellow/orange gradient
@@ -42,7 +48,12 @@ const getWeatherIcon = (condition, score) => {
   }
 };
 
-const getWeatherBackground = (condition, score) => {
+const getWeatherBackground = (condition, score, isDay) => {
+  // If it's nighttime, always show night background
+  if (!isDay) {
+    return WEATHER_IMAGES.night;
+  }
+
   const normalizedCondition = condition?.toLowerCase() || "";
 
   if (score >= 80 || normalizedCondition.includes("sun") || normalizedCondition.includes("clear")) {
@@ -132,9 +143,9 @@ export function WeatherWidget({ solarUnitId }) {
   }
 
   const { current, solarImpact, location } = weather;
-  const gradientClass = getWeatherGradient(current.condition, solarImpact.score);
-  const weatherIcon = getWeatherIcon(current.condition, solarImpact.score);
-  const weatherBackground = getWeatherBackground(current.condition, solarImpact.score);
+  const isDay = current.isDay !== false; // Default to true if undefined for backwards compatibility
+  const gradientClass = getWeatherGradient(current.condition, solarImpact.score, isDay);
+  const weatherBackground = getWeatherBackground(current.condition, solarImpact.score, isDay);
   const ratingColorClass = getRatingColor(solarImpact.rating);
   const scoreColorClass = getScoreColor(solarImpact.score);
 
@@ -150,7 +161,6 @@ export function WeatherWidget({ solarUnitId }) {
           />
         )}
         <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
-        {weatherIcon}
       </div>
 
       {/* Content */}
@@ -158,11 +168,11 @@ export function WeatherWidget({ solarUnitId }) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className={`flex items-center gap-2 ${!isDay ? "text-slate-100" : ""}`}>
                 <Sun className="w-5 h-5" />
                 Weather & Solar Impact
               </CardTitle>
-              <CardDescription className="mt-1">
+              <CardDescription className={`mt-1 ${!isDay ? "text-slate-300" : ""}`}>
                 {location.city || "Current Location"} • Updated {formatDistanceToNow(new Date(weather.timestamp), { addSuffix: true })}
               </CardDescription>
             </div>
@@ -170,7 +180,7 @@ export function WeatherWidget({ solarUnitId }) {
               variant="ghost"
               size="sm"
               onClick={() => refetch()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${!isDay ? "text-slate-300 hover:text-slate-100 hover:bg-slate-700" : ""}`}
               title="Refresh weather data"
             >
               <RefreshCw className="h-4 w-4" />
@@ -180,63 +190,72 @@ export function WeatherWidget({ solarUnitId }) {
 
         <CardContent className="space-y-4">
           {/* Solar Impact Score */}
-          <div className={`border rounded-lg p-4 ${ratingColorClass}`}>
+          <div className={`border rounded-lg p-4 ${!isDay ? "text-white bg-slate-800/60 border-slate-600" : ratingColorClass}`}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Solar Impact Score</span>
-              <span className={`text-2xl font-bold ${scoreColorClass}`}>
-                {solarImpact.score}
-              </span>
+              {!isDay ? (
+                <span className="text-sm font-medium text-slate-300">N/A</span>
+              ) : (
+                <span className={`text-2xl font-bold ${scoreColorClass}`}>
+                  {solarImpact.score}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Gauge className="w-4 h-4" />
-              <span className="text-sm font-semibold">{solarImpact.rating}</span>
+              <span className="text-sm font-semibold">{!isDay ? "Nighttime" : solarImpact.rating}</span>
             </div>
-            <p className="text-xs mt-2">{solarImpact.insight}</p>
+            <p className="text-xs mt-2">
+              {!isDay
+                ? "No solar power generation during nighttime. Power generation will resume at sunrise."
+                : solarImpact.insight
+              }
+            </p>
           </div>
 
           {/* Current Weather Conditions */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-muted-foreground">Current Conditions</h4>
+            <h4 className={`text-sm font-semibold ${!isDay ? "text-slate-300" : "text-muted-foreground"}`}>Current Conditions</h4>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2 text-sm">
-                <Cloud className="w-4 h-4 text-muted-foreground" />
+                <Cloud className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
                 <div>
-                  <p className="text-xs text-muted-foreground">Cloud Cover</p>
-                  <p className="font-medium">{current.cloudCover}%</p>
+                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Cloud Cover</p>
+                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.cloudCover}%</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
-                <Thermometer className="w-4 h-4 text-muted-foreground" />
+                <Thermometer className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
                 <div>
-                  <p className="text-xs text-muted-foreground">Temperature</p>
-                  <p className="font-medium">{current.temperature}°C</p>
+                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Temperature</p>
+                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.temperature}°C</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
-                <CloudRain className="w-4 h-4 text-muted-foreground" />
+                <CloudRain className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
                 <div>
-                  <p className="text-xs text-muted-foreground">Precipitation</p>
-                  <p className="font-medium">{current.precipitation} mm</p>
+                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Precipitation</p>
+                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.precipitation} mm</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
-                <Wind className="w-4 h-4 text-muted-foreground" />
+                <Wind className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
                 <div>
-                  <p className="text-xs text-muted-foreground">Wind Speed</p>
-                  <p className="font-medium">{current.windSpeed} km/h</p>
+                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Wind Speed</p>
+                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.windSpeed} km/h</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm p-3 bg-muted rounded-md">
-              <Sun className="w-4 h-4 text-muted-foreground" />
+            <div className={`flex items-center gap-2 text-sm p-3 rounded-md ${!isDay ? "bg-slate-800/60 border border-slate-600" : "bg-muted"}`}>
+              <Sun className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
               <div>
-                <p className="text-xs text-muted-foreground">Solar Irradiance</p>
-                <p className="font-medium">{current.solarIrradiance} W/m²</p>
+                <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Solar Irradiance</p>
+                <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.solarIrradiance} W/m²</p>
               </div>
             </div>
           </div>
