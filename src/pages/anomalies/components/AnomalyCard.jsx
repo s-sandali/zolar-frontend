@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Moon, CheckCircle } from "lucide-react";
+import { AlertCircle, Moon, CheckCircle, Sun, Zap, TrendingDown } from "lucide-react";
 import { useAcknowledgeAnomalyMutation, useResolveAnomalyMutation } from "@/lib/redux/query";
 import { useState } from "react";
 
@@ -65,9 +65,11 @@ const getAnomalyIcon = (type) => {
     case 'NIGHTTIME_GENERATION':
       return <Moon className="h-5 w-5" />;
     case 'ZERO_GENERATION_CLEAR_SKY':
-      return <AlertCircle className="h-5 w-5" />;
+      return <Sun className="h-5 w-5" />;
     case 'OVERPRODUCTION':
-      return <AlertCircle className="h-5 w-5" />;
+      return <Zap className="h-5 w-5" />;
+    case 'SUDDEN_PRODUCTION_DROP':
+      return <TrendingDown className="h-5 w-5" />;
     default:
       return <AlertCircle className="h-5 w-5" />;
   }
