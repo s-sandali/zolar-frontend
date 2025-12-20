@@ -18,12 +18,12 @@ const items = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: <LayoutDashboard className="w-10 h-10" size={32} />,
+    icon: <LayoutDashboard className="w-8 h-8" size={32} />,
   },
   {
     title: "Anomalies",
     url: "/dashboard/anomalies",
-    icon: <TriangleAlert className="w-10 h-8" size={32} />,
+    icon: <TriangleAlert className="w-8 h-8" size={32} />,
   },
   {
     title: "Analytics",
