@@ -2,38 +2,38 @@ import { ShieldCheck, Sparkles, Zap, Timer } from "lucide-react";
 
 const solutionHighlights = [
   {
-    title: "Automated diagnostics",
-    description: "Machine intelligence scans inverter streams every 5 minutes and flags root-cause insights instantly.",
+    title: "Real-Time Diagnostics",
+    description: "Energy generation records are continuously analyzed to detect abnormal output patterns, missing data, and sudden efficiency drops across solar units.",
     icon: ShieldCheck,
   },
   {
-    title: "Guided playbooks",
-    description: "Technicians receive step-by-step instructions, parts lists, and safety notes inside the app.",
+    title: "Weather-Aware Insights",
+    description: "Each anomaly is automatically labeled as Info, Warning, or Critical based on impact, duration, and deviation from expected output",
     icon: Sparkles,
   },
   {
-    title: "Smart escalations",
+    title: "Smart Escalations",
     description: "Severe anomalies open a maintenance ticket, notify the field team, and sync with your CMMS.",
     icon: Zap,
   },
   {
-    title: "Proof of resolution",
-    description: "Annotated photos, meter readings, and closure notes are stored for compliance in one timeline.",
+    title: "Traceable Resolution History",
+    description: "All anomalies, alerts, and actions are logged and visualized on the dashboard—giving teams full visibility into system health over time.",
     icon: Timer,
   },
 ];
 
 const resolutionStats = [
   { label: "Avg. response", value: "12 min", detail: "Triaged within" },
-  { label: "On-site fixes", value: "92%", detail: "Resolved first visit" },
-  { label: "Downtime saved", value: "18 hrs", detail: "Per month" },
+  { label: "Detection Latency", value: "<6 min", detail: "Based on data ingestion interval" },
+  { label: "Alert Accuracy", value: "92%", detail: "Weather-filtered anomalies" },
 ];
 
 const responsePlaybook = [
-  "Realtime anomaly alert arrives in the mobile app",
-  "System auto-verifies sensors & weather context",
-  "Playbook assigns task to the closest available engineer",
-  "Resolution proof syncs to dashboard and customer report",
+  "Solar unit shows abnormal generation pattern",
+  "Solar unit shows abnormal generation pattern",
+  "Anomaly severity is calculated and logged",
+  "Alert appears on the dashboard with recommended next steps",
 ];
 
 export default function SolutionSection() {
@@ -46,11 +46,13 @@ export default function SolutionSection() {
             <span>Solution</span>
           </div>
           <h2 className="text-3xl font-bold leading-tight text-slate-900 md:text-5xl">
-            Automated remediation keeps every kilowatt on track.
+            Automated anomaly detection keeps every unit performing.
           </h2>
           <p className="text-lg text-slate-600">
-            When anomalies surface, Zolar orchestrates fixes automatically. Real-time diagnostics, prioritized workflows, and
-            traceable field actions protect production while delighting customers.
+            When irregular patterns appear in your solar generation data, Zolar detects them early. 
+            By combining real-time energy records, weather conditions, and historical trends, the 
+            system highlights underperformance, sensor issues, and unexpected drops—so you can act 
+            before energy is lost.
           </p>
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -74,7 +76,7 @@ export default function SolutionSection() {
             <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">Service Impact</p>
             <h3 className="mt-3 text-3xl font-semibold">Rapid recovery, measurable gains.</h3>
             <p className="mt-2 text-sm text-slate-200">
-              Cross-team visibility keeps maintenance, support, and asset managers aligned on the same facts.
+              Clear insights. Faster decisions. Less energy loss..
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {resolutionStats.map((stat) => (
@@ -88,7 +90,7 @@ export default function SolutionSection() {
           </div>
 
           <div className="rounded-[28px] border border-blue-100 bg-blue-50/70 p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-500">Response Playbook</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-500">Anomaly Response Flow</p>
             <ul className="mt-4 space-y-3 text-sm text-slate-700">
               {responsePlaybook.map((step, index) => (
                 <li key={step} className="flex items-start gap-3">
