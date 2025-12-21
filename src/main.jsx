@@ -21,6 +21,7 @@ import AdminPage from "./pages/admin/admin.page.jsx";
 import SolarUnitEditPage from "./pages/admin/solar-unit-edit.page.jsx";
 import SolarUnitCreatePage from "./pages/admin/solar-unit-create.page.jsx";
 import AnomaliesPage from "./pages/anomalies/anomalies.page.jsx";
+import AnalyticsPage from "./pages/analytics/analytics.page.jsx";
 
 import { store } from "@/lib/redux/store.js";
 import { Provider } from "react-redux";
@@ -49,6 +50,7 @@ createRoot(document.getElementById("root")).render(
                 <Route element={<DashboardLayout />}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/dashboard/anomalies" element={<AnomaliesPage />} />
+                  <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
                 </Route>
                 <Route element={<AuthorizedLayout />}>
                   <Route element={<AdminLayout />}>

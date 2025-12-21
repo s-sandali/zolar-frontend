@@ -15,7 +15,7 @@ export const api = createApi({
     }
     return headers;
   } }),
-  tagTypes: ["SolarUnit", "Weather", "Anomalies"],
+  tagTypes: ["SolarUnit", "Weather", "Anomalies", "Analytics"],
   endpoints: (build) => ({
     getEnergyGenerationRecordsBySolarUnit: build.query({
       query: ({id, groupBy, limit}) => `/energy-generation-records/solar-unit/${id}?groupBy=${groupBy}&limit=${limit}`,
@@ -87,6 +87,19 @@ export const api = createApi({
       }),
       invalidatesTags: ["Anomalies"],
     }),
+    // Analytics endpoints
+    getWeatherAdjustedPerformance: build.query({
+      query: ({ solarUnitId, days = 7 }) => `/analytics/weather-performance/${solarUnitId}?days=${days}`,
+      providesTags: ["Analytics"],
+    }),
+    getAnomalyDistribution: build.query({
+      query: ({ solarUnitId, days = 30 }) => `/analytics/anomaly-distribution/${solarUnitId}?days=${days}`,
+      providesTags: ["Analytics"],
+    }),
+    getSystemHealth: build.query({
+      query: ({ solarUnitId, days = 7 }) => `/analytics/system-health/${solarUnitId}?days=${days}`,
+      providesTags: ["Analytics"],
+    }),
   }),
 });
 
@@ -105,4 +118,7 @@ export const {
   useGetAnomalyStatsQuery,
   useAcknowledgeAnomalyMutation,
   useResolveAnomalyMutation,
+  useGetWeatherAdjustedPerformanceQuery,
+  useGetAnomalyDistributionQuery,
+  useGetSystemHealthQuery,
 } = api;

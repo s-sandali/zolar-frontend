@@ -1,39 +1,51 @@
-import imgWindTurbine from "./wind-turbine.png";
-import { Sailboat, Shield, Triangle, Wind } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, ChevronDown, Menu } from "lucide-react";
+
+
+
 
 export default function HeroSection() {
   return (
-    <div className="bg-white px-12 font-[Inter]">
-      {/* Navigation Bar */}
-      
-      {/* Main Content */}
-      <main className="px-4 py-4 md:px-6 md:py-16">
-        <div>
-          {/* Hero Section */}
-          <div className="mb-12 md:mb-24">
-            <h1 className="text-4xl leading-tight font-bold text-black sm:text-5xl sm:leading-20 md:text-7xl md:leading-32 xl:text-8xl">
-              <div>Monitor Your Home's</div>
-              <div className="flex flex-row items-center gap-4 sm:gap-8">
-                <span>Solar Energy</span>
-                <div className="relative">
-                  <img
-                    src={imgWindTurbine}
-                    alt="Solar panels on a house roof"
-                    className="max-h-8 rounded-xl object-cover sm:max-h-16 md:max-h-20 md:rounded-2xl"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-4 sm:gap-8">
-                <span>with Real-Time</span>
-              </div>
-              <div className="flex flex-row items-center gap-4 sm:gap-8">
-                <span>Insights & Alerts</span>
-                
-              </div>
+    <section className="relative isolate min-h-[92vh] overflow-hidden font-[Inter] text-white">
+      <div className="absolute inset-0">
+        <picture>
+          <source
+            srcSet="/assets/images/solar2.jpg"
+            type="image/webp"
+          />
+        
+          <img
+            src="/assets/images/solar2.jpg"
+            alt="Family walking through a high-efficiency solar farm"
+            loading="eager"
+            className="h-full w-full object-cover"
+          />
+        </picture>
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-900/65 to-slate-900/30" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent_60%)]" />
+
+      <div className="relative z-10 mx-auto flex min-h-[92vh] w-full max-w-7xl flex-col px-6 py-6 md:px-10 lg:px-16">
+        
+
+        <div className="flex flex-1 flex-col justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-3xl space-y-6"
+          >
+            <h1 className="text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl">
+              Clean Renewable Limitless Energy with Zolar
             </h1>
-          </div>
+            <p className="text-base text-white/80 md:text-lg">
+              Monitor your home's solar energy with real-time insights & alerts
+            </p>            
+          </motion.div>
         </div>
-      </main>
-    </div>
+
+        
+      </div>
+    </section>
   );
 }
