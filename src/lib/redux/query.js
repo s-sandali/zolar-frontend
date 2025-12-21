@@ -1,11 +1,22 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const sanitizeUrl = (url) => url?.replace(/\/$/, "");
-const resolvedBackendUrl =
-  sanitizeUrl(import.meta.env?.VITE_BACKEND_URL) ||
-  sanitizeUrl(window?.__BACKEND_URL__) ||
-  "http://localhost:8000";
-const baseUrl = `${resolvedBackendUrl}/api`;
+const sanitizeUrl = (url) => (typeof url === "string" ? url.replace(/\/$/, "") : undefined);
+
+const resolveBackendUrl = () => {
+  const envUrl =
+    sanitizeUrl(import.meta.env?.VITE_BACKEND_URL_DEPLOYED) ||
+    sanitizeUrl(import.meta.env?.VITE_BACKEND_URL);
+
+  if (envUrl) return envUrl;
+
+  if (typeof window !== "undefined" && typeof window.__BACKEND_URL__ === "string") {
+    return sanitizeUrl(window.__BACKEND_URL__);
+  }
+
+  return "http://localhost:8000";
+};
+
+const baseUrl = `${resolveBackendUrl()}/api`;
 
 // Define a service using a base URL and expected endpoints
 export const api = createApi({

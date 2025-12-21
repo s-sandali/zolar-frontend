@@ -15,7 +15,11 @@ const CheckoutForm = ({ invoiceId }) => {
   // Stripe calls this to get the client secret
   const fetchClientSecret = useCallback(async () => {
     const token = await getToken();
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const backendUrl =
+      import.meta.env.VITE_BACKEND_URL_DEPLOYED ||
+      import.meta.env.VITE_BACKEND_URL ||
+      (typeof window !== "undefined" && window.__BACKEND_URL__) ||
+      "http://localhost:8000";
 
     const response = await fetch(
       `${backendUrl}/api/payments/create-checkout-session`,
