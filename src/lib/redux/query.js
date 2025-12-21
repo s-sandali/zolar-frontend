@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseUrl = "http://localhost:8000/api";
+const sanitizeUrl = (url) => url?.replace(/\/$/, "");
+const resolvedBackendUrl =
+  sanitizeUrl(import.meta.env?.VITE_BACKEND_URL) ||
+  sanitizeUrl(window?.__BACKEND_URL__) ||
+  "http://localhost:8000";
+const baseUrl = `${resolvedBackendUrl}/api`;
 
 // Define a service using a base URL and expected endpoints
 export const api = createApi({
@@ -15,7 +20,7 @@ export const api = createApi({
     }
     return headers;
   } }),
-  tagTypes: ["SolarUnit", "Weather", "Anomalies", "Analytics"],
+  tagTypes: ["SolarUnit", "Weather", "Anomalies", "Analytics", "Invoice"],
   endpoints: (build) => ({
     getEnergyGenerationRecordsBySolarUnit: build.query({
       query: ({id, groupBy, limit}) => `/energy-generation-records/solar-unit/${id}?groupBy=${groupBy}&limit=${limit}`,
@@ -100,6 +105,42 @@ export const api = createApi({
       query: ({ solarUnitId, days = 7 }) => `/analytics/system-health/${solarUnitId}?days=${days}`,
       providesTags: ["Analytics"],
     }),
+    // Invoice endpoints
+    getInvoices: build.query({
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.status) queryParams.append('status', params.status);
+        return `/invoices${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      providesTags: ["Invoice"],
+    }),
+    getInvoiceById: build.query({
+      query: (id) => `/invoices/${id}`,
+      providesTags: ["Invoice"],
+    }),
+    getAllInvoices: build.query({
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams();
+        if (params.status) queryParams.append('status', params.status);
+        return `/invoices/admin/all${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      },
+      providesTags: ["Invoice"],
+    }),
+    getPendingInvoiceCount: build.query({
+      query: () => `/invoices/pending-count`,
+      providesTags: ["Invoice"],
+    }),
+    // Payment endpoints
+    createPaymentSession: build.mutation({
+      query: (invoiceId) => ({
+        url: `/payments/create-checkout-session`,
+        method: "POST",
+        body: { invoiceId },
+      }),
+    }),
+    getSessionStatus: build.query({
+      query: (sessionId) => `/payments/session-status?session_id=${sessionId}`,
+    }),
   }),
 });
 
@@ -121,4 +162,10 @@ export const {
   useGetWeatherAdjustedPerformanceQuery,
   useGetAnomalyDistributionQuery,
   useGetSystemHealthQuery,
+  useGetInvoicesQuery,
+  useGetInvoiceByIdQuery,
+  useGetAllInvoicesQuery,
+  useGetPendingInvoiceCountQuery,
+  useCreatePaymentSessionMutation,
+  useGetSessionStatusQuery,
 } = api;
