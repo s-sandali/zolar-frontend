@@ -3,17 +3,17 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 const sanitizeUrl = (url) => (typeof url === "string" ? url.replace(/\/$/, "") : undefined);
 
 const resolveBackendUrl = () => {
-  const envUrl =
-    sanitizeUrl(import.meta.env?.VITE_BACKEND_URL_DEPLOYED) ||
-    sanitizeUrl(import.meta.env?.VITE_BACKEND_URL);
+  // In development (localhost), use local backend
+  // In production (deployed), use deployed backend
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-  if (envUrl) return envUrl;
-
-  if (typeof window !== "undefined" && typeof window.__BACKEND_URL__ === "string") {
-    return sanitizeUrl(window.__BACKEND_URL__);
+  if (isDevelopment) {
+    // Use local backend for development
+    return sanitizeUrl(import.meta.env?.VITE_BACKEND_URL) || "http://localhost:8000";
+  } else {
+    // Use deployed backend for production
+    return sanitizeUrl(import.meta.env?.VITE_BACKEND_URL_DEPLOYED) || sanitizeUrl(import.meta.env?.VITE_BACKEND_URL) || "http://localhost:8000";
   }
-
-  return "http://localhost:8000";
 };
 
 const baseUrl = `${resolveBackendUrl()}/api`;
