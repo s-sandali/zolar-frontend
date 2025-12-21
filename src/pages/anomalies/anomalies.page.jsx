@@ -41,6 +41,7 @@ const AnomaliesPage = () => {
           Monitor and manage anomalies detected in your solar unit
         </p>
       </div>
+     
 
       {/* Statistics Cards */}
       {isLoadingStats ? (
@@ -104,6 +105,10 @@ const AnomaliesPage = () => {
           </Card>
         </div>
       )}
+       {/* Original Data Card for Reference */}
+      <div className="mt-12">
+        <DataCard solarUnitId={solarUnit._id} />
+      </div>
 
       {/* Filter Tabs */}
       <div className="flex gap-2 border-b">
@@ -179,11 +184,7 @@ const AnomaliesPage = () => {
         )}
       </div>
 
-      {/* Original Data Card for Reference */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4">Energy Production Analysis</h2>
-        <DataCard solarUnitId={solarUnit._id} />
-      </div>
+      
     </main>
   );
 };

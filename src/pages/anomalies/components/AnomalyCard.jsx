@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Moon, CheckCircle, Sun, Zap, TrendingDown } from "lucide-react";
+import { AlertCircle, Moon, CheckCircle, Sun, Zap, TrendingDown, CloudRain, AlertTriangle } from "lucide-react";
 import { useAcknowledgeAnomalyMutation, useResolveAnomalyMutation } from "@/lib/redux/query";
 import { useState } from "react";
 
@@ -66,8 +66,11 @@ const getAnomalyIcon = (type) => {
       return <Moon className="h-5 w-5" />;
     case 'ZERO_GENERATION_CLEAR_SKY':
       return <Sun className="h-5 w-5" />;
-    case 'OVERPRODUCTION':
-      return <Zap className="h-5 w-5" />;
+    case 'ENERGY_EXCEEDING_THRESHOLD':
+      return <AlertTriangle className="h-5 w-5" />;
+    case 'HIGH_GENERATION_BAD_WEATHER':
+    case 'LOW_GENERATION_CLEAR_WEATHER':
+      return <CloudRain className="h-5 w-5" />;
     case 'SUDDEN_PRODUCTION_DROP':
       return <TrendingDown className="h-5 w-5" />;
     default:
