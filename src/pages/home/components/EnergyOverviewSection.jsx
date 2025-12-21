@@ -31,7 +31,7 @@ export default function EnergyOverviewSection() {
         <div className="space-y-6">
           <div className="overflow-hidden rounded-[32px] border border-blue-100 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.08)]">
             <img
-              src="/assets/images/wind-turbine-2.png"
+              src="/assets/images/solar1.jpg"
               alt="Offshore wind turbines generating electricity"
               className="h-full w-full object-cover"
             />
@@ -55,24 +55,23 @@ export default function EnergyOverviewSection() {
 
         <div className="space-y-8">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-500">
-              Performance Overview
-            </p>
+           
             <h2 className="mt-3 text-4xl font-bold text-slate-900 md:text-5xl">
-              Your Solar Energy Generation
+              Smarter solar, powered by real-time insight
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-600">
-              This month, your solar panels generated <span className="text-blue-600 font-semibold">X kWh</span> of clean energy,
-              helping you save on electricity bills and reduce your carbon footprint.
-              Track your energy production trends and see how much power you contribute back to the grid.
+              We help homes and businesses get more from their solar systems through intelligent
+               monitoring, predictive analytics, and actionable insights. From real-time performance 
+               tracking to early fault detection, our platform ensures your solar investment operates 
+               at peak efficiency every day.
             </p>
           </div>
 
           <div className="grid gap-4 text-sm text-slate-700">
             {[
-              "Live diagnostics monitor anomalies across each inverter",
-              "Predictive alerts notify your team before faults occur",
-              "Daily insights highlight the best time to store or sell energy",
+              "Live diagnostics monitor anomalies across each panel",
+              "Weather-aware performance insights optimize energy use",
+              "Early warnings before faults affect output",
             ].map((item) => (
               <div key={item} className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 text-lime-500" />
