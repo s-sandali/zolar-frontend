@@ -31,8 +31,8 @@ export default function ProblemSection() {
         </div>
         <div className="overflow-hidden rounded-[32px] border border-amber-100 bg-amber-50">
           <img
-            src="/assets/images/wind-turbine-3.png"
-            alt="Wind turbines representing renewable energy challenges"
+            src="/assets/images/solar3.jpg"
+            alt="Solar panels representing renewable energy challenges"
             className="h-full w-full object-cover"
           />
         </div>
