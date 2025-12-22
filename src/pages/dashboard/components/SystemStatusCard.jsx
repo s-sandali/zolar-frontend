@@ -61,7 +61,7 @@ export function SystemStatusCard({ solarUnit, solarUnitId }) {
     : "Awaiting maintenance";
 
   return (
-    <Card className="h-full border border-slate-200/70 shadow-lg">
+    <Card className="h-full rounded-3xl border border-slate-200/80 shadow-xl">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Bolt className="w-4 h-4 text-amber-500" />
