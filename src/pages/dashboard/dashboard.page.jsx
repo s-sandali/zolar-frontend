@@ -3,70 +3,89 @@ import DataChart from "./components/DataChart";
 import { LocationEditor } from "./components/LocationEditor";
 import { WeatherWidget } from "./components/WeatherWidget";
 import { SystemStatusCard } from "./components/SystemStatusCard";
+import { PeakDistributionCard } from "./components/PeakDistributionCard";
 import { useUser } from "@clerk/clerk-react";
 import { MapPin } from "lucide-react";
 
 const DashboardPage = () => {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
 
   const { data: solarUnit, isLoading: isLoadingSolarUnit, isError: isErrorSolarUnit, error: errorSolarUnit } = useGetSolarUnitForUserQuery();
 
   if (isLoadingSolarUnit) {
-    return <div>Loading...</div>;
+    return <div className="mt-10 text-center text-muted-foreground">Loading your dashboard…</div>;
   }
 
   if (isErrorSolarUnit) {
-    return <div>Error: {errorSolarUnit.message}</div>;
+    return <div className="mt-10 text-center text-destructive">Error: {errorSolarUnit.message}</div>;
   }
 
-  console.log("Solar Unit Data:", solarUnit);
-  console.log("Location:", solarUnit?.location);
-
-  const hasLocation = solarUnit?.location?.latitude && solarUnit?.location?.longitude;
-
-  console.log("Has Location:", hasLocation);
+  const hasLocation = Boolean(solarUnit?.location?.latitude && solarUnit?.location?.longitude);
+  const capacityKw = solarUnit?.capacity ? (solarUnit.capacity / 1000).toFixed(1) : "—";
+  const statusLabel = solarUnit?.status || "Unknown";
 
   return (
-    <main className="mt-4">
-      <h1 className="text-4xl font-bold text-foreground">{user?.firstName}'s House</h1>
-      <p className="text-gray-600 mt-2">
-        Welcome back to your Solar Energy Production Dashboard
-      </p>
-
-      <div className="mt-8 space-y-6">
-        {/* Show location editor prominently if location is not set */}
-        {!hasLocation && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="w-5 h-5 text-amber-900" />
-              <h2 className="text-lg font-semibold text-amber-900">
-                Set Your Location
-              </h2>
-            </div>
-            <p className="text-sm text-amber-700">
-              Add your array's coordinates below to unlock precise weather predictions and solar insights.
+    <main className="mt-4 space-y-8 pb-12">
+      <section className="rounded-[32px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 text-white shadow-2xl">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.5em] text-slate-300">Dashboard</p>
+            <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">{user?.firstName}'s Solar Hub</h1>
+            <p className="mt-3 max-w-2xl text-sm text-slate-300">
+              Monitor production, weather, and system health from a single, calming command center.
             </p>
           </div>
-        )}
-
-        <div className={`grid gap-6 ${hasLocation ? "lg:grid-cols-3" : "grid-cols-1"}`}>
-          {hasLocation && (
-            <div className="lg:col-span-2">
-              <WeatherWidget solarUnitId={solarUnit._id} />
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+              <p className="text-[11px] uppercase tracking-wide text-slate-300">Capacity</p>
+              <p className="text-2xl font-semibold text-white">{capacityKw} kW</p>
             </div>
-          )}
-          <SystemStatusCard solarUnit={solarUnit} solarUnitId={solarUnit._id} />
-        </div>
-
-        <div className={`grid gap-6 ${hasLocation ? "lg:grid-cols-3" : "grid-cols-1"}`}>
-          <div className={hasLocation ? "lg:col-span-2" : ""}>
-            <DataChart solarUnitId={solarUnit._id} />
+            <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
+              <p className="text-[11px] uppercase tracking-wide text-slate-300">Status</p>
+              <p className="text-2xl font-semibold text-white">{statusLabel}</p>
+            </div>
           </div>
-          <LocationEditor solarUnit={solarUnit} />
         </div>
-      </div>
+      </section>
+
+      {!hasLocation && (
+        <section className="rounded-3xl border border-amber-200/80 bg-amber-50/70 p-5 shadow-lg">
+          <div className="flex items-center gap-2 text-amber-900">
+            <MapPin className="h-5 w-5" />
+            <h2 className="text-lg font-semibold">Set Your Array Location</h2>
+          </div>
+          <p className="mt-2 text-sm text-amber-900/80">
+            We need your coordinates once to unlock hyperlocal forecasts. Scroll to the location card below to finish setup.
+          </p>
+        </section>
+      )}
+
+      <section className="grid gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <WeatherWidget solarUnitId={solarUnit._id} />
+        </div>
+        <SystemStatusCard solarUnit={solarUnit} solarUnitId={solarUnit._id} />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <DataChart solarUnitId={solarUnit._id} />
+        </div>
+        <PeakDistributionCard solarUnitId={solarUnit._id} />
+      </section>
+
+      <section id="location-settings" className="grid gap-6 lg:grid-cols-2">
+        <LocationEditor solarUnit={solarUnit} />
+        <div className="rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50 to-white p-6 shadow-xl">
+          <h3 className="text-lg font-semibold text-slate-900">Daily Planning Tips</h3>
+          <ul className="mt-4 space-y-3 text-sm text-slate-600">
+            <li>• Schedule energy-heavy tasks during the peak window (10:00–16:00).</li>
+            <li>• Keep panels clear of debris each weekend for predictable output.</li>
+            <li>• Watch the anomaly badge for proactive maintenance cues.</li>
+          </ul>
+        </div>
+      </section>
     </main>
   );
 };
-
 export default DashboardPage;
