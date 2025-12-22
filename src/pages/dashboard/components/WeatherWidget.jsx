@@ -96,6 +96,24 @@ const getScoreColor = (score) => {
   return "text-red-600";
 };
 
+const getWeatherTheme = (_score, isDay) => {
+  const baseText = isDay ? "text-slate-900" : "text-slate-50";
+  const mutedText = isDay ? "text-slate-600" : "text-slate-300";
+  const panel = isDay
+    ? "bg-white/85 backdrop-blur-xl border border-white/70 shadow-lg"
+    : "bg-slate-950/65 backdrop-blur-xl border border-white/10 shadow-2xl";
+
+  const chip = isDay ? "bg-slate-900/5 text-slate-900" : "bg-white/15 text-white";
+
+  return {
+    baseText,
+    mutedText,
+    panel,
+    chip,
+    overlay: isDay ? "bg-white/60" : "bg-slate-950/75",
+  };
+};
+
 export function WeatherWidget({ solarUnitId }) {
   // Poll for weather updates every 10 minutes (600000 ms)
   const { data: weather, isLoading, isError, error, refetch } = useGetWeatherBySolarUnitQuery(solarUnitId, {
@@ -148,9 +166,11 @@ export function WeatherWidget({ solarUnitId }) {
   const weatherBackground = getWeatherBackground(current.condition, solarImpact.score, isDay);
   const ratingColorClass = getRatingColor(solarImpact.rating);
   const scoreColorClass = getScoreColor(solarImpact.score);
+  const theme = getWeatherTheme(solarImpact.score, isDay);
+  const ratingBadgeClass = !isDay ? "border border-white/40 text-white" : `border ${ratingColorClass}`;
 
   return (
-    <Card className={`h-full relative overflow-hidden ${gradientClass}`}>
+    <Card className={`h-full min-h-[420px] relative overflow-hidden border-0 shadow-xl ${gradientClass}`}>
       {/* Weather Background */}
       <div className="absolute inset-0 pointer-events-none">
         {weatherBackground && (
@@ -160,27 +180,28 @@ export function WeatherWidget({ solarUnitId }) {
             aria-hidden="true"
           />
         )}
-        <div className="absolute inset-0 bg-white/60" aria-hidden="true" />
+        <div className={`absolute inset-0 ${theme.overlay}`} aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/30" aria-hidden="true" />
       </div>
 
       {/* Content */}
       <div className="relative z-10">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <CardTitle className={`flex items-center gap-2 ${!isDay ? "text-slate-100" : ""}`}>
+              <CardTitle className={`flex items-center gap-2 text-base tracking-tight ${theme.baseText}`}>
                 <Sun className="w-5 h-5" />
                 Weather & Solar Impact
               </CardTitle>
-              <CardDescription className={`mt-1 ${!isDay ? "text-slate-300" : ""}`}>
+              <CardDescription className={`mt-1 ${theme.mutedText}`}>
                 {location.city || "Current Location"} • Updated {formatDistanceToNow(new Date(weather.timestamp), { addSuffix: true })}
               </CardDescription>
             </div>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="secondary"
+              size="icon"
               onClick={() => refetch()}
-              className={`h-8 w-8 p-0 ${!isDay ? "text-slate-300 hover:text-slate-100 hover:bg-slate-700" : ""}`}
+              className={`h-9 w-9 rounded-full border border-white/30 bg-white/20 text-white hover:bg-white/40 ${!isDay ? "backdrop-blur" : "text-slate-700 border-slate-200"}`}
               title="Refresh weather data"
             >
               <RefreshCw className="h-4 w-4" />
@@ -188,77 +209,127 @@ export function WeatherWidget({ solarUnitId }) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* Solar Impact Score */}
-          <div className={`border rounded-lg p-4 ${!isDay ? "text-white bg-slate-800/60 border-slate-600" : ratingColorClass}`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Solar Impact Score</span>
-              {!isDay ? (
-                <span className="text-sm font-medium text-slate-300">N/A</span>
-              ) : (
-                <span className={`text-2xl font-bold ${scoreColorClass}`}>
-                  {solarImpact.score}
+        <CardContent className="space-y-5 pt-0">
+          <section className={`rounded-2xl p-5 transition-all ${theme.panel}`}>
+            <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div className="space-y-2">
+                <p className={`text-xs uppercase tracking-[0.3em] ${theme.mutedText}`}>
+                  Now in {location.city || "current location"}
+                </p>
+                <p className={`text-5xl font-semibold leading-tight ${theme.baseText}`}>
+                  {current.temperature}°C
+                </p>
+                <p className={`flex items-center gap-2 text-base ${theme.mutedText}`}>
+                  <Cloud className="w-4 h-4" />
+                  {current.condition}
+                </p>
+              </div>
+              <div className="text-right space-y-2">
+                <p className={`text-xs uppercase tracking-[0.3em] ${theme.mutedText}`}>Solar score</p>
+                <p className={`text-5xl font-black leading-none ${scoreColorClass}`}>
+                  {isDay ? solarImpact.score : "—"}
+                </p>
+                <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold ${ratingBadgeClass}`}>
+                  {!isDay ? "Nighttime" : solarImpact.rating}
                 </span>
-              )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Gauge className="w-4 h-4" />
-              <span className="text-sm font-semibold">{!isDay ? "Nighttime" : solarImpact.rating}</span>
-            </div>
-            <p className="text-xs mt-2">
+            <p className={`mt-4 text-sm leading-relaxed ${theme.mutedText}`}>
               {!isDay
-                ? "No solar power generation during nighttime. Power generation will resume at sunrise."
-                : solarImpact.insight
-              }
+                ? "Panels are resting overnight. We'll resume tracking production at sunrise."
+                : solarImpact.insight || "Stable sunlight expected through the next interval."}
             </p>
-          </div>
-
-          {/* Current Weather Conditions */}
-          <div className="space-y-3">
-            <h4 className={`text-sm font-semibold ${!isDay ? "text-slate-300" : "text-muted-foreground"}`}>Current Conditions</h4>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Cloud className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
-                <div>
-                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Cloud Cover</p>
-                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.cloudCover}%</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm">
-                <Thermometer className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
-                <div>
-                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Temperature</p>
-                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.temperature}°C</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm">
-                <CloudRain className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
-                <div>
-                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Precipitation</p>
-                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.precipitation} mm</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm">
-                <Wind className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
-                <div>
-                  <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Wind Speed</p>
-                  <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.windSpeed} km/h</p>
-                </div>
-              </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 ${theme.chip}`}>
+                <Sun className="w-3 h-3" />
+                {isDay ? "Active daylight window" : "Night mode"}
+              </span>
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 ${theme.chip}`}>
+                <Wind className="w-3 h-3" />
+                {current.windSpeed} km/h winds
+              </span>
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 ${theme.chip}`}>
+                <CloudRain className="w-3 h-3" />
+                {current.precipitation} mm rain
+              </span>
             </div>
+          </section>
 
-            <div className={`flex items-center gap-2 text-sm p-3 rounded-md ${!isDay ? "bg-slate-800/60 border border-slate-600" : "bg-muted"}`}>
-              <Sun className={`w-4 h-4 ${!isDay ? "text-slate-400" : "text-muted-foreground"}`} />
-              <div>
-                <p className={`text-xs ${!isDay ? "text-slate-400" : "text-muted-foreground"}`}>Solar Irradiance</p>
-                <p className={`font-medium ${!isDay ? "text-slate-200" : ""}`}>{current.solarIrradiance} W/m²</p>
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className={`${theme.panel} rounded-2xl p-5 space-y-3`}>
+              <div className="flex items-center gap-3">
+                <Gauge className="w-5 h-5" />
+                <div>
+                  <p className={`text-sm font-semibold ${theme.baseText}`}>Production outlook</p>
+                  <p className={`text-xs ${theme.mutedText}`}>
+                    {!isDay ? "Night pause" : solarImpact.rating}
+                  </p>
+                </div>
               </div>
+              <p className={`text-sm leading-relaxed ${theme.mutedText}`}>
+                {!isDay
+                  ? "Generation is paused after sunset. Stored energy powers the home until daylight returns."
+                  : solarImpact.insight || "Expect steady generation for the next cycle."}
+              </p>
             </div>
-          </div>
+            <div className={`${theme.panel} rounded-2xl p-5 space-y-3`}>
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5" />
+                <p className={`text-sm font-semibold ${theme.baseText}`}>Suggested actions</p>
+              </div>
+              <ul className="space-y-2 text-sm">
+                {(!isDay
+                  ? [
+                      "Keep batteries in reserve mode overnight.",
+                      "Schedule heavy appliances for the morning window.",
+                    ]
+                  : [
+                      solarImpact.score >= 70
+                        ? "Perfect window to top up batteries or run EV charging."
+                        : "Generation is modest—prioritize essential loads.",
+                      current.windSpeed > 25
+                        ? "Gusty winds detected—ensure rooftop gear stays secure."
+                        : "Calm winds keep panel efficiency steady.",
+                    ]
+                ).map((tip) => (
+                  <li key={tip} className={theme.mutedText}>
+                    • {tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {[{
+              label: "Air temp",
+              value: `${current.temperature}°C`,
+              icon: Thermometer,
+            },
+            {
+              label: "Solar irradiance",
+              value: `${current.solarIrradiance} W/m²`,
+              icon: Sun,
+            },
+            {
+              label: "Cloud cover",
+              value: `${current.cloudCover}%`,
+              icon: Cloud,
+            },
+            {
+              label: "Wind speed",
+              value: `${current.windSpeed} km/h`,
+              icon: Wind,
+            }].map(({ label, value, icon: Icon }) => (
+              <div key={label} className={`${theme.panel} rounded-2xl p-3 flex items-center gap-3`}>
+                <Icon className="w-5 h-5" />
+                <div>
+                  <p className={`text-xs uppercase tracking-wide ${theme.mutedText}`}>{label}</p>
+                  <p className={`text-lg font-semibold ${theme.baseText}`}>{value}</p>
+                </div>
+              </div>
+            ))}
+          </section>
         </CardContent>
       </div>
     </Card>
