@@ -2,6 +2,7 @@ import { useGetSolarUnitForUserQuery } from "@/lib/redux/query";
 import DataChart from "./components/DataChart";
 import { LocationEditor } from "./components/LocationEditor";
 import { WeatherWidget } from "./components/WeatherWidget";
+import { SystemStatusCard } from "./components/SystemStatusCard";
 import { useUser } from "@clerk/clerk-react";
 import { MapPin } from "lucide-react";
 
@@ -42,24 +43,26 @@ const DashboardPage = () => {
                 Set Your Location
               </h2>
             </div>
-            <p className="text-sm text-amber-700 mb-4">
-              To enable weather insights and optimize your solar energy tracking, please set your solar panel's location.
+            <p className="text-sm text-amber-700">
+              Add your array's coordinates below to unlock precise weather predictions and solar insights.
             </p>
-            <LocationEditor solarUnit={solarUnit} />
           </div>
         )}
 
-        {/* Weather and Location widgets side by side (only when location is set) */}
-        {hasLocation && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <WeatherWidget solarUnitId={solarUnit._id} />
-            <LocationEditor solarUnit={solarUnit} />
-          </div>
-        )}
+        <div className={`grid gap-6 ${hasLocation ? "lg:grid-cols-3" : "grid-cols-1"}`}>
+          {hasLocation && (
+            <div className="lg:col-span-2">
+              <WeatherWidget solarUnitId={solarUnit._id} />
+            </div>
+          )}
+          <SystemStatusCard solarUnit={solarUnit} solarUnitId={solarUnit._id} />
+        </div>
 
-        {/* Main dashboard chart */}
-        <div>
-          <DataChart solarUnitId={solarUnit._id} />
+        <div className={`grid gap-6 ${hasLocation ? "lg:grid-cols-3" : "grid-cols-1"}`}>
+          <div className={hasLocation ? "lg:col-span-2" : ""}>
+            <DataChart solarUnitId={solarUnit._id} />
+          </div>
+          <LocationEditor solarUnit={solarUnit} />
         </div>
       </div>
     </main>
