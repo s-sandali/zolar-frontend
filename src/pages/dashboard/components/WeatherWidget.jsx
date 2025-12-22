@@ -170,7 +170,7 @@ export function WeatherWidget({ solarUnitId }) {
   const ratingBadgeClass = !isDay ? "border border-white/40 text-white" : `border ${ratingColorClass}`;
 
   return (
-    <Card className={`h-full min-h-[420px] relative overflow-hidden border-0 shadow-xl ${gradientClass}`}>
+    <Card className={`h-full min-h-[420px] relative overflow-hidden rounded-3xl border border-slate-200/60 shadow-2xl ${gradientClass}`}>
       {/* Weather Background */}
       <div className="absolute inset-0 pointer-events-none">
         {weatherBackground && (
