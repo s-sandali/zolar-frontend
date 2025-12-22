@@ -124,7 +124,7 @@ export function LocationEditor({ solarUnit }) {
     const hasLocation = solarUnit.location?.latitude && solarUnit.location?.longitude;
 
     return (
-        <Card className="h-full">
+        <Card className="h-full rounded-3xl border border-slate-200/80 bg-white/95 shadow-xl">
             <CardHeader className="pb-3">
                 <CardTitle className="text-base">Panel Location</CardTitle>
                 <CardDescription className="text-xs">
