@@ -29,6 +29,7 @@ import PaymentCompletePage from "./pages/invoices/complete.page.jsx";
 import { store } from "@/lib/redux/store.js";
 import { Provider } from "react-redux";
 import { ClerkProvider } from "@clerk/clerk-react";
+import { ThemeProvider } from "@/components/theme/theme-provider.jsx";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -40,39 +41,41 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-          <Routes>
-            <Route element={<RootLayout />}>
-              <Route path="/sign-in" element={<SignInPage />} />
-              <Route path="/sign-up" element={<SignUpPage />} />
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<HomePage />} />
-              </Route>
-              <Route element={<ProtectedLayout />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/dashboard/anomalies" element={<AnomaliesPage />} />
-                  <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-                  <Route path="/dashboard/invoices" element={<InvoicesPage />} />
-                  <Route path="/dashboard/invoices/:invoiceId/pay" element={<PaymentPage />} />
-                  <Route path="/dashboard/invoices/complete" element={<PaymentCompletePage />} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+            <Routes>
+              <Route element={<RootLayout />}>
+                <Route path="/sign-in" element={<SignInPage />} />
+                <Route path="/sign-up" element={<SignUpPage />} />
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<HomePage />} />
                 </Route>
-                <Route element={<AuthorizedLayout />}>
-                  <Route element={<AdminLayout />}>
-                    <Route path="/admin" element={<AdminPage />} />
-                    <Route path="/admin/solar-units" element={<SolarUnitsPage />} />
-                    <Route path="/admin/solar-units/:id" element={<SolarUnitDetailPage />} />
-                    <Route path="/admin/solar-units/:id/edit" element={<SolarUnitEditPage />} />
-                    <Route path="/admin/solar-units/create" element={<SolarUnitCreatePage />} />
-                    <Route path="/admin/settings" element={<SettingsPage />} />
+                <Route element={<ProtectedLayout />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/dashboard/anomalies" element={<AnomaliesPage />} />
+                    <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+                    <Route path="/dashboard/invoices" element={<InvoicesPage />} />
+                    <Route path="/dashboard/invoices/:invoiceId/pay" element={<PaymentPage />} />
+                    <Route path="/dashboard/invoices/complete" element={<PaymentCompletePage />} />
+                  </Route>
+                  <Route element={<AuthorizedLayout />}>
+                    <Route element={<AdminLayout />}>
+                      <Route path="/admin" element={<AdminPage />} />
+                      <Route path="/admin/solar-units" element={<SolarUnitsPage />} />
+                      <Route path="/admin/solar-units/:id" element={<SolarUnitDetailPage />} />
+                      <Route path="/admin/solar-units/:id/edit" element={<SolarUnitEditPage />} />
+                      <Route path="/admin/solar-units/create" element={<SolarUnitCreatePage />} />
+                      <Route path="/admin/settings" element={<SettingsPage />} />
+                    </Route>
                   </Route>
                 </Route>
               </Route>
-            </Route>
-          </Routes>
-        </ClerkProvider>
-      </BrowserRouter>
+            </Routes>
+          </ClerkProvider>
+        </BrowserRouter>
+      </ThemeProvider>
     </Provider>
   </StrictMode>
 );
