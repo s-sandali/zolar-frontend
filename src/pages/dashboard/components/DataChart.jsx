@@ -55,25 +55,23 @@ const DataChart = ({ solarUnitId }) => {
   const title = "Energy Production Chart";
 
   return (
-    <Card className="rounded-md p-4">
-      <div className="flex justify-between items-center gap-2">
-        <h2 className="text-xl font-medium text-foreground">{title}</h2>
+    <Card className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-xl">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Select value={selectedRange} onValueChange={handleRangeChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue
-                className="text-foreground"
-                placeholder="Select Range"
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 Days</SelectItem>
-              <SelectItem value="30">30 Days</SelectItem>
-            </SelectContent>
-          </Select>
+          <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+          <p className="text-sm text-slate-500">Actual generation grouped by day</p>
         </div>
+        <Select value={selectedRange} onValueChange={handleRangeChange}>
+          <SelectTrigger className="w-[150px] border-slate-200 bg-white/70">
+            <SelectValue placeholder="Select range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="7">Last 7 days</SelectItem>
+            <SelectItem value="30">Last 30 days</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <div>
+      <div className="mt-4">
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
