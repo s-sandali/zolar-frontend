@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -10,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/theme/theme-toggle.jsx";
 
 // Menu items for admin navigation.
 const items = [
@@ -43,10 +45,10 @@ const AdminSideBarTab = ({ item }) => {
 
 export function AdminSidebar() {
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar className="border-r border-sidebar-border/60 bg-sidebar bg-sidebar/95 pt-6 text-sidebar-foreground backdrop-blur-xl">
+      <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-3xl font-bold text-foreground">
+          <SidebarGroupLabel className="text-3xl font-bold text-sidebar-foreground">
             <Link to="/">Aelora</Link>
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -57,6 +59,12 @@ export function AdminSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarFooter className="mt-auto px-4 pb-6">
+          <div className="flex items-center justify-between rounded-2xl border border-sidebar-border/60 bg-sidebar-accent bg-sidebar-accent/50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-sidebar-foreground/70">
+            <span>Theme</span>
+            <ThemeToggle className="size-10" />
+          </div>
+        </SidebarFooter>
       </SidebarContent>
     </Sidebar>
   );
