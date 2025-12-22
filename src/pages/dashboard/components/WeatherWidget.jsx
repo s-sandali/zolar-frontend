@@ -286,9 +286,9 @@ export function WeatherWidget({ solarUnitId }) {
                   : [
                       solarImpact.score >= 70
                         ? "Perfect window to top up batteries or run EV charging."
-                        : "Generation is modest—prioritize essential loads.",
+                        : "Generation is modest prioritize essential loads.",
                       current.windSpeed > 25
-                        ? "Gusty winds detected—ensure rooftop gear stays secure."
+                        ? "Gusty winds detected ensure rooftop gear stays secure."
                         : "Calm winds keep panel efficiency steady.",
                     ]
                 ).map((tip) => (
