@@ -116,8 +116,8 @@ export const api = createApi({
       query: ({ solarUnitId, days = 7 }) => `/analytics/system-health/${solarUnitId}?days=${days}`,
       providesTags: ["Analytics"],
     }),
-    getPeakDistribution: build.query({
-      query: ({ solarUnitId, days = 14 }) => `/analytics/peak-distribution/${solarUnitId}?days=${days}`,
+    getCapacityFactor: build.query({
+      query: ({ solarUnitId, days = 14 }) => `/analytics/capacity-factor/${solarUnitId}?days=${days}`,
       providesTags: ["Analytics"],
     }),
     // Invoice endpoints
@@ -177,7 +177,7 @@ export const {
   useGetWeatherAdjustedPerformanceQuery,
   useGetAnomalyDistributionQuery,
   useGetSystemHealthQuery,
-  useGetPeakDistributionQuery,
+  useGetCapacityFactorQuery,
   useGetInvoicesQuery,
   useGetInvoiceByIdQuery,
   useGetAllInvoicesQuery,

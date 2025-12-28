@@ -3,7 +3,7 @@ import DataChart from "./components/DataChart";
 import { LocationEditor } from "./components/LocationEditor";
 import { WeatherWidget } from "./components/WeatherWidget";
 import { SystemStatusCard } from "./components/SystemStatusCard";
-import { PeakDistributionCard } from "./components/PeakDistributionCard";
+import { CapacityFactorCard } from "./components/CapacityFactorCard";
 import { useUser } from "@clerk/clerk-react";
 import { MapPin } from "lucide-react";
 
@@ -71,7 +71,7 @@ const DashboardPage = () => {
         <div className="xl:col-span-2">
           <DataChart solarUnitId={solarUnit._id} />
         </div>
-        <PeakDistributionCard solarUnitId={solarUnit._id} />
+        <CapacityFactorCard solarUnitId={solarUnit._id} />
       </section>
 
       <section id="location-settings" className="grid gap-6 lg:grid-cols-2">
