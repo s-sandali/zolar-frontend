@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Moon, CheckCircle, Sun, Zap, TrendingDown, CloudRain, AlertTriangle } from "lucide-react";
+import { AlertCircle, Moon, Check, CheckCircle, Sun, TrendingDown, CloudRain, AlertTriangle } from "lucide-react";
 import { useAcknowledgeAnomalyMutation, useResolveAnomalyMutation } from "@/lib/redux/query";
 import { useState } from "react";
 
@@ -83,11 +83,112 @@ const formatAnomalyType = (type) => {
   return type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
 };
 
+const ANOMALY_INSIGHTS = {
+  ENERGY_EXCEEDING_THRESHOLD: {
+    meaning: "Reading jumped above the unit's physical capacity.",
+    context: ["Expected limit", "Measured spike", "Impossible for hardware"],
+    impact: {
+      title: "Invalid data inflates reports",
+      details: "KPIs and invoices will overstate energy until this sensor or configuration issue is fixed."
+    },
+    actions: [
+      "Compare the configured capacity with the inverter nameplate.",
+      "Inspect metering wiring for cross-feed or duplication.",
+      "Escalate to your admin if spikes keep appearing."
+    ]
+  },
+  ZERO_GENERATION_CLEAR_SKY: {
+    meaning: "Daylight hours show flat zero production.",
+    context: ["Sunlight available", "No output", "Weather OK"],
+    impact: {
+      title: "Potential production loss",
+      details: "Power may be down even though irradiance is healthy revenue could be affected."
+    },
+    actions: [
+      "Check inverter status or alarms.",
+      "Verify grid connection and breakers.",
+      "Log a maintenance ticket if it stays flat next interval."
+    ]
+  },
+  NIGHTTIME_GENERATION: {
+    meaning: "Energy logged during dark hours.",
+    context: ["After sunset", "Non-zero reading", "Clock mismatch"],
+    impact: {
+      title: "Data quality risk",
+      details: "Nighttime energy corrupts daily totals and can hide real faults."
+    },
+    actions: [
+      "Confirm device timezone and daylight-saving settings.",
+      "Check ingestion pipeline for delayed payloads.",
+      "Notify support if it keeps happening."
+    ]
+  },
+  LOW_GENERATION_CLEAR_WEATHER: {
+    meaning: "Clear weather but output is well below baseline.",
+    context: ["Clear sky", "Peak hours", "Low ratio"],
+    impact: {
+      title: "Efficiency loss",
+      details: "Panels might be dirty, shaded, or degrading expect lower billable energy."
+    },
+    actions: [
+      "Inspect panels for dust or new shading.",
+      "Schedule cleaning or preventive maintenance.",
+      "Track the ratio for a few days to confirm recovery."
+    ]
+  },
+  HIGH_GENERATION_BAD_WEATHER: {
+    meaning: "Stormy weather but energy looks unusually high.",
+    context: ["Rain/clouds", "High output", "Weather mismatch"],
+    impact: {
+      title: "Source mismatch",
+      details: "Weather feed or site mapping may be wrong, which skews insights and billing."
+    },
+    actions: [
+      "Verify site coordinates and weather source.",
+      "Ensure weather sync jobs are up to date.",
+      "Compare recent batches for duplication."
+    ]
+  },
+  FROZEN_GENERATION: {
+    meaning: "Reading hasn't changed for multiple intervals.",
+    context: ["Same value", "Changing weather", "Telemetry stuck"],
+    impact: {
+      title: "Stale dashboard",
+      details: "Real issues stay hidden while the feed is frozen." 
+    },
+    actions: [
+      "Check the data logger or gateway connection.",
+      "Restart the collector/service if possible.",
+      "Escalate if the stream does not resume." 
+    ]
+  }
+};
+
+const getAnomalyInsight = (type) => {
+  if (ANOMALY_INSIGHTS[type]) {
+    return ANOMALY_INSIGHTS[type];
+  }
+
+  return {
+    meaning: `${formatAnomalyType(type)} detected review the latest readings.`,
+    context: ["Outlier detected", "Check live data"],
+    impact: {
+      title: "Needs operator review",
+      details: "The pattern deviates from historical behavior and may hide a fault."
+    },
+    actions: [
+      "Validate the source data in your monitoring console.",
+      "Acknowledge or resolve once you confirm the status."
+    ]
+  };
+};
+
 const AnomalyCard = ({ anomaly }) => {
   const [acknowledgeAnomaly, { isLoading: isAcknowledging }] = useAcknowledgeAnomalyMutation();
   const [resolveAnomaly, { isLoading: isResolving }] = useResolveAnomalyMutation();
   const [showResolveDialog, setShowResolveDialog] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const insight = getAnomalyInsight(anomaly.type);
 
   const handleAcknowledge = async () => {
     try {
@@ -144,12 +245,37 @@ const AnomalyCard = ({ anomaly }) => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Description */}
-        <div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            {anomaly.description}
-          </p>
+        <div className="rounded-xl border border-slate-200/70 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Insight</p>
+          <p className="mt-1 text-base font-medium text-slate-900 dark:text-white">{insight.meaning}</p>
         </div>
+
+        <div className="rounded-lg border-l-4 border-l-slate-600 bg-slate-50/80 p-4 dark:border-l-slate-400 dark:bg-slate-900/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Impact</p>
+            <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{insight.impact.title}</p>
+            <p className="mt-1 text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{insight.impact.details}</p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-slate-200/70 bg-white/80 p-4 dark:border-slate-800 dark:bg-slate-950/30">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Recommended next steps</p>
+            <ul className="mt-3 space-y-2">
+              {insight.actions.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
+                  <Check className="mt-0.5 h-4 w-4 text-emerald-600" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {anomaly.description && (
+          <div className="rounded-lg border border-slate-200/60 bg-slate-50/60 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">System note</p>
+            <p className="mt-1 text-sm text-slate-800 dark:text-slate-100 leading-relaxed">{anomaly.description}</p>
+          </div>
+        )}
 
         {/* Metadata */}
         {anomaly.metadata && (
@@ -181,13 +307,7 @@ const AnomalyCard = ({ anomaly }) => {
           </div>
         )}
 
-        {/* Threshold Information */}
-        {anomaly.metadata?.threshold && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs font-medium text-blue-900 mb-1">Detection Threshold</p>
-            <p className="text-sm text-blue-700">{anomaly.metadata.threshold}</p>
-          </div>
-        )}
+        {/* Threshold removed per UX request */}
 
         {/* Resolution Notes (if resolved) */}
         {anomaly.status === 'RESOLVED' && anomaly.resolutionNotes && (
