@@ -319,7 +319,7 @@ const AnalyticsPage = () => {
                     Breakdown by anomaly type (last 30 days)
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
                   <ChartContainer
                     config={Object.fromEntries(
                       anomalyData.byType.map((item, i) => [
@@ -330,7 +330,7 @@ const AnalyticsPage = () => {
                         },
                       ])
                     )}
-                    className="h-[260px] w-full lg:max-w-[320px]"
+                    className="h-[260px] w-full lg:flex-1 lg:max-w-none"
                   >
                     <PieChart>
                       <Pie
@@ -351,7 +351,7 @@ const AnalyticsPage = () => {
                     </PieChart>
                   </ChartContainer>
 
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-1 space-y-3 lg:min-w-[240px]">
                     {anomalyData.byType.map((item, index) => (
                       <div
                         key={item.type}
