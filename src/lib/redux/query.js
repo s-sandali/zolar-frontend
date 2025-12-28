@@ -32,6 +32,7 @@ export const api = createApi({
     return headers;
   } }),
   tagTypes: ["SolarUnit", "Weather", "Anomalies", "Analytics", "Invoice"],
+  keepUnusedDataFor: 0, // This forces immediate cache invalidation
   endpoints: (build) => ({
     getEnergyGenerationRecordsBySolarUnit: build.query({
       query: ({id, groupBy, limit}) => `/energy-generation-records/solar-unit/${id}?groupBy=${groupBy}&limit=${limit}`,
