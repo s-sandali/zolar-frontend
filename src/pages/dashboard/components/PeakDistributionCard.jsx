@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
 import {
   Select,
   SelectContent,
@@ -43,12 +43,26 @@ export const PeakDistributionCard = ({ solarUnitId }) => {
 
   const chartData = useMemo(() => {
     if (!data?.daily?.length) return [];
-    return data.daily.map((day) => ({
-      date: formatLabelDate(day.date),
-      peak: formatWhToKwh(day.peakWh),
-      offPeak: formatWhToKwh(day.offPeakWh),
-      peakShare: day.peakShare,
-    }));
+    return data.daily.map((day) => {
+      const rawShare = typeof day.peakShare === "number" ? day.peakShare : 0;
+      const peakShare = Math.min(Math.max(rawShare, 0), 100);
+      let dateFullLabel = day.date;
+
+      try {
+        dateFullLabel = format(new Date(day.date), "MMM d, yyyy");
+      } catch (error) {
+        dateFullLabel = day.date;
+      }
+
+      return {
+        date: formatLabelDate(day.date),
+        dateFull: dateFullLabel,
+        peak: formatWhToKwh(day.peakWh),
+        offPeak: formatWhToKwh(day.offPeakWh),
+        peakShare,
+        offPeakShare: Math.max(0, 100 - peakShare),
+      };
+    });
   }, [data]);
 
   const totals = {
@@ -58,14 +72,39 @@ export const PeakDistributionCard = ({ solarUnitId }) => {
   };
 
   const chartConfig = {
-    peak: {
-      label: "Peak (kWh)",
+    peakShare: {
+      label: "Peak share",
       color: "oklch(0.74 0.12 150)",
     },
-    offPeak: {
-      label: "Off-peak (kWh)",
+    offPeakShare: {
+      label: "Off-peak share",
       color: "oklch(0.83 0.16 80)",
     },
+  };
+
+  const tooltipFormatter = (value, _, item) => {
+    const numericValue = typeof value === "number" ? value : Number(value ?? 0);
+    const energyKey = item.dataKey === "peakShare" ? "peak" : "offPeak";
+    const energyValue = item.payload?.[energyKey] ?? 0;
+
+    return (
+      <div className="flex w-full items-center justify-between gap-4">
+        <span className="text-muted-foreground">
+          {chartConfig[item.dataKey]?.label || item.name}
+        </span>
+        <span className="text-right font-mono text-sm font-semibold">
+          {numericValue.toFixed(1)}%
+          <span className="block text-[10px] font-normal text-muted-foreground">
+            {typeof energyValue === "number" ? energyValue.toFixed(1) : energyValue} kWh
+          </span>
+        </span>
+      </div>
+    );
+  };
+
+  const tooltipLabelFormatter = (_, payload) => {
+    const [first] = payload || [];
+    return first?.payload?.dateFull || first?.payload?.date || "";
   };
 
   const renderEmptyState = !isFetching && (!chartData.length || isError);
@@ -114,28 +153,47 @@ export const PeakDistributionCard = ({ solarUnitId }) => {
             <p className="text-xs">Try expanding the date range.</p>
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="min-h-[240px]">
-            <BarChart
-              accessibilityLayer
+          <ChartContainer config={chartConfig} className="aspect-square min-h-[260px]">
+            <RadialBarChart
               data={chartData}
-              margin={{ top: 16, right: 8, left: 8, bottom: 0 }}
+              innerRadius="36%"
+              outerRadius="90%"
+              startAngle={90}
+              endAngle={-270}
+              barCategoryGap="12%"
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/40" />
-              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis
-                tickFormatter={(value) => `${value}`}
+              <PolarGrid radialLines={false} className="stroke-border/40" />
+              <PolarRadiusAxis tick={false} axisLine={false} angleAxisId={0} domain={[0, 100]} />
+              <PolarAngleAxis
+                dataKey="date"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
-                width={28}
+                tick={{ fill: "currentColor", fontSize: 11 }}
               />
               <ChartTooltip
-                cursor={{ fill: "var(--color-muted)" }}
-                content={<ChartTooltipContent />} 
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    indicator="line"
+                    formatter={tooltipFormatter}
+                    labelFormatter={tooltipLabelFormatter}
+                  />
+                }
               />
-              <Bar dataKey="offPeak" stackId="energy" fill="var(--color-offPeak)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="peak" stackId="energy" fill="var(--color-peak)" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <RadialBar
+                dataKey="offPeakShare"
+                stackId="shares"
+                cornerRadius={8}
+                fill="var(--color-offPeakShare)"
+                background
+              />
+              <RadialBar
+                dataKey="peakShare"
+                stackId="shares"
+                cornerRadius={8}
+                fill="var(--color-peakShare)"
+              />
+            </RadialBarChart>
           </ChartContainer>
         )}
       </CardContent>
