@@ -319,7 +319,7 @@ const AnalyticsPage = () => {
                     Breakdown by anomaly type (last 30 days)
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-8">
                   <ChartContainer
                     config={Object.fromEntries(
                       anomalyData.byType.map((item, i) => [
@@ -351,25 +351,25 @@ const AnalyticsPage = () => {
                     </PieChart>
                   </ChartContainer>
 
-                  <div className="flex-1 space-y-3 lg:min-w-[240px]">
+                  <div className="flex-1 space-y-3 min-w-0 max-h-[260px] overflow-y-auto overflow-x-hidden pr-1">
                     {anomalyData.byType.map((item, index) => (
                       <div
                         key={item.type}
-                        className="flex items-center justify-between rounded-2xl border border-border/60 bg-card/60 p-3"
+                        className="flex items-center justify-between rounded-2xl border border-border/60 bg-card/60 p-3 gap-2"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <span
-                            className="h-3 w-3 rounded-full"
+                            className="h-3 w-3 rounded-full flex-shrink-0"
                             style={{ backgroundColor: ANOMALY_COLORS[index % ANOMALY_COLORS.length] }}
                           />
-                          <div>
-                            <p className="text-sm font-medium capitalize">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium capitalize truncate">
                               {item.type.replace(/_/g, " ")}
                             </p>
-                            <p className="text-xs text-muted-foreground">{item.count} events</p>
+                            <p className="text-xs text-muted-foreground truncate">{item.count} events</p>
                           </div>
                         </div>
-                        <span className="text-sm font-semibold">{item.percentage}%</span>
+                        <span className="text-sm font-semibold flex-shrink-0">{item.percentage}%</span>
                       </div>
                     ))}
                   </div>
