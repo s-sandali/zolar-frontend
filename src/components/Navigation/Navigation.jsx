@@ -13,10 +13,10 @@ import { ArrowRight, Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle.jsx";
 
 const sectionLinks = [
+  { label: "Trust", href: "/#trust" },
   { label: "About", href: "/#about" },
   { label: "Problem", href: "/#problem" },
   { label: "Solution", href: "/#solution" },
-  { label: "Features", href: "/#features" },
 ];
 
 const Navigation = () => {
