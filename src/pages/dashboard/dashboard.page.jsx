@@ -4,6 +4,7 @@ import { LocationEditor } from "./components/LocationEditor";
 import { WeatherWidget } from "./components/WeatherWidget";
 import { SystemStatusCard } from "./components/SystemStatusCard";
 import { CapacityFactorCard } from "./components/CapacityFactorCard";
+import { EcoImpactCard } from "./components/EcoImpactCard";
 import { useUser } from "@clerk/clerk-react";
 import { MapPin } from "lucide-react";
 
@@ -76,14 +77,7 @@ const DashboardPage = () => {
 
       <section id="location-settings" className="grid gap-6 lg:grid-cols-2">
         <LocationEditor solarUnit={solarUnit} />
-        <div className="rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50 to-white p-6 shadow-xl">
-          <h3 className="text-lg font-semibold text-slate-900">Daily Planning Tips</h3>
-          <ul className="mt-4 space-y-3 text-sm text-slate-600">
-            <li>• Schedule energy-heavy tasks during the peak window (10:00–16:00).</li>
-            <li>• Keep panels clear of debris each weekend for predictable output.</li>
-            <li>• Watch the anomaly badge for proactive maintenance cues.</li>
-          </ul>
-        </div>
+        <EcoImpactCard solarUnitId={solarUnit._id} />
       </section>
     </main>
   );
