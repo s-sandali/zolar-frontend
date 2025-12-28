@@ -158,7 +158,7 @@ const AnomalyCard = ({ anomaly }) => {
               <div>
                 <p className="text-xs text-gray-500 font-medium">Expected</p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {anomaly.metadata.expectedValue} Wh
+                  {(anomaly.metadata.expectedValue / 1000).toFixed(2)} kWh
                 </p>
               </div>
             )}
@@ -166,7 +166,7 @@ const AnomalyCard = ({ anomaly }) => {
               <div>
                 <p className="text-xs text-gray-500 font-medium">Actual</p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {anomaly.metadata.actualValue} Wh
+                  {(anomaly.metadata.actualValue / 1000).toFixed(2)} kWh
                 </p>
               </div>
             )}
