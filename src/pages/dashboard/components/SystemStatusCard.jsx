@@ -28,10 +28,10 @@ const formatCapacity = (capacity) => {
   return `${kilowatts % 1 === 0 ? kilowatts : kilowatts.toFixed(1)} kW`;
 };
 
-const formatEnergy = (totalWh) => {
-  if (typeof totalWh !== "number") return "—";
-  const kwh = totalWh / 1000;
-  return `${kwh.toFixed(kwh >= 10 ? 0 : 1)} kWh`;
+const formatEnergy = (totalKwh) => {
+  if (typeof totalKwh !== "number") return "—";
+  // API now returns kWh directly, no conversion needed
+  return `${totalKwh.toFixed(totalKwh >= 10 ? 0 : 1)} kWh`;
 };
 
 export function SystemStatusCard({ solarUnit, solarUnitId }) {
