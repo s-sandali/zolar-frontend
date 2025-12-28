@@ -2,15 +2,16 @@ import {
   useGetSolarUnitForUserQuery,
   useGetWeatherAdjustedPerformanceQuery,
   useGetAnomalyDistributionQuery,
-  useGetSystemHealthQuery
 } from "@/lib/redux/query";
 import { useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, Zap, AlertTriangle, Activity, Shield } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend, ResponsiveContainer } from "recharts";
+import { TrendingUp, TrendingDown, Zap, AlertTriangle } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, PieChart, Pie, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useState } from "react";
+
+const ANOMALY_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
 const AnalyticsPage = () => {
   const { user } = useUser();
@@ -25,11 +26,6 @@ const AnalyticsPage = () => {
 
   const { data: anomalyData, isLoading: isLoadingAnomalies } = useGetAnomalyDistributionQuery(
     { solarUnitId: solarUnit?._id, days: 30 },
-    { skip: !solarUnit?._id }
-  );
-
-  const { data: healthData, isLoading: isLoadingHealth } = useGetSystemHealthQuery(
-    { solarUnitId: solarUnit?._id, days },
     { skip: !solarUnit?._id }
   );
 
@@ -323,37 +319,60 @@ const AnalyticsPage = () => {
                     Breakdown by anomaly type (last 30 days)
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-center">
                   <ChartContainer
                     config={Object.fromEntries(
                       anomalyData.byType.map((item, i) => [
                         item.type,
                         {
-                          label: item.type.replace(/_/g, ' '),
-                          color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][i % 6],
-                        }
+                          label: item.type.replace(/_/g, " "),
+                          color: ANOMALY_COLORS[i % ANOMALY_COLORS.length],
+                        },
                       ])
                     )}
-                    className="h-[250px] w-full"
+                    className="h-[260px] w-full lg:max-w-[320px]"
                   >
                     <PieChart>
                       <Pie
                         data={anomalyData.byType}
                         dataKey="count"
                         nameKey="type"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        label={(entry) => `${entry.percentage}%`}
+                        innerRadius={50}
+                        outerRadius={110}
+                        paddingAngle={2}
+                        label={(entry) => `${Math.round(entry.percentage ?? 0)}%`}
+                        labelLine={false}
                       >
                         {anomalyData.byType.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][index % 6]} />
+                          <Cell key={`cell-${index}`} fill={ANOMALY_COLORS[index % ANOMALY_COLORS.length]} />
                         ))}
                       </Pie>
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Legend />
                     </PieChart>
                   </ChartContainer>
+
+                  <div className="flex-1 space-y-3">
+                    {anomalyData.byType.map((item, index) => (
+                      <div
+                        key={item.type}
+                        className="flex items-center justify-between rounded-2xl border border-border/60 bg-card/60 p-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: ANOMALY_COLORS[index % ANOMALY_COLORS.length] }}
+                          />
+                          <div>
+                            <p className="text-sm font-medium capitalize">
+                              {item.type.replace(/_/g, " ")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{item.count} events</p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-semibold">{item.percentage}%</span>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             ) : (
@@ -370,138 +389,6 @@ const AnalyticsPage = () => {
               </Card>
             )}
 
-            {/* Chart 5: System Health Score */}
-            {healthData ? (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">System Health Score</CardTitle>
-                  <CardDescription className="text-xs">
-                    Overall system performance rating
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[250px] flex flex-col items-center justify-center">
-                    <div className="relative w-32 h-32">
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="64"
-                          cy="64"
-                          r="56"
-                          stroke="#e5e7eb"
-                          strokeWidth="12"
-                          fill="none"
-                        />
-                        <circle
-                          cx="64"
-                          cy="64"
-                          r="56"
-                          stroke={healthData.healthScore >= 85 ? '#10b981' : healthData.healthScore >= 70 ? '#3b82f6' : healthData.healthScore >= 50 ? '#f59e0b' : '#ef4444'}
-                          strokeWidth="12"
-                          fill="none"
-                          strokeDasharray={`${(healthData.healthScore / 100) * 351.68} 351.68`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold">{healthData.healthScore}</span>
-                        <span className="text-xs text-gray-500">/ 100</span>
-                      </div>
-                    </div>
-                    <div className={`mt-4 px-3 py-1 rounded-full text-sm font-medium ${
-                      healthData.rating === 'Excellent' ? 'bg-green-100 text-green-700' :
-                      healthData.rating === 'Good' ? 'bg-blue-100 text-blue-700' :
-                      healthData.rating === 'Fair' ? 'bg-orange-100 text-orange-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {healthData.rating}
-                    </div>
-                    <div className="mt-4 w-full space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Performance:</span>
-                        <span className="font-semibold">{healthData.factors.performanceImpact}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Uptime:</span>
-                        <span className="font-semibold">{healthData.factors.uptimeImpact}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Anomaly Impact:</span>
-                        <span className="font-semibold">{healthData.factors.anomalyImpact}%</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">System Health Score</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center h-[250px]">
-                  {isLoadingHealth ? <Skeleton className="h-32 w-32 rounded-full" /> : <p className="text-sm text-gray-500">Loading health data...</p>}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Chart 6: Anomaly Trends Over Time */}
-            {anomalyData && anomalyData.recentTrend && anomalyData.recentTrend.length > 0 ? (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Anomaly Trends</CardTitle>
-                  <CardDescription className="text-xs">
-                    Daily anomaly count over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      count: {
-                        label: "Anomaly Count",
-                        color: "#ef4444",
-                      },
-                    }}
-                    className="h-[250px] w-full"
-                  >
-                    <LineChart data={anomalyData.recentTrend}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        tickLine={false}
-                        axisLine={false}
-                        fontSize={11}
-                      />
-                      <YAxis
-                        tickLine={false}
-                        axisLine={false}
-                        fontSize={11}
-                        allowDecimals={false}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line
-                        type="monotone"
-                        dataKey="count"
-                        stroke="var(--color-count)"
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Anomaly Trends</CardTitle>
-                  <CardDescription className="text-xs">
-                    Daily anomaly count over time
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center h-[250px]">
-                  <p className="text-sm text-gray-500">No trend data available</p>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Insights */}
